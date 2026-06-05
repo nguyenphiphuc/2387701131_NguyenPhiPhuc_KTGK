@@ -1,0 +1,158 @@
+@model _2387701131_NguyenPhiPhuc_KTGK.Models.CourseListViewModel
+@{
+    ViewData["Title"] = "Trang chủ - Danh sách học phần";
+}
+
+<div class="hero-section">
+    <div class="container">
+        <h1 class="hero-title"><i class="fas fa-graduation-cap"></i> Hệ thống đăng ký học phần</h1>
+        <p class="hero-subtitle">Khám phá và đăng ký các học phần phù hợp với bạn</p>
+    </div>
+</div>
+
+<div class="container">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Search Bar -->
+    <div class="search-section">
+        <form method="get" asp-action="Index" class="search-form">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Tìm kiếm học phần theo tên..." value="@Model.SearchQuery" />
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary">Xóa bộ lọc</a>
+                }
+            </div>
+        </form>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SearchQuery))
+    {
+        <p class="search-result-info">Kết quả tìm kiếm cho: <strong>"@Model.SearchQuery"</strong></p>
+    }
+
+    <!-- Course List -->
+    <div class="row">
+        @if (Model.Courses.Any())
+        {
+            @foreach (var course in Model.Courses)
+            {
+                <div class="col-12 mb-4">
+                    <div class="course-card">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <div class="course-image-wrapper">
+                                    @if (!string.IsNullOrEmpty(course.Image))
+                                    {
+                                        <img src="@course.Image" alt="@course.Name" class="course-image" />
+                                    }
+                                    else
+                                    {
+                                        <div class="course-image-placeholder">
+                                            <i class="fas fa-book-open"></i>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="course-body">
+                                    <h3 class="course-title">@course.Name</h3>
+                                    <div class="course-info">
+                                        <span class="badge-custom badge-credits">
+                                            <i class="fas fa-star"></i> @course.Credits tín chỉ
+                                        </span>
+                                        <span class="badge-custom badge-category">
+                                            <i class="fas fa-folder"></i> @course.Category?.Name
+                                        </span>
+                                    </div>
+                                    <p class="course-lecturer">
+                                        <i class="fas fa-chalkboard-teacher"></i> @course.Lecturer
+                                    </p>
+                                    <div class="course-actions">
+                                        @if (User.IsInRole("STUDENT"))
+                                        {
+                                            @if (Model.EnrolledCourseIds.Contains(course.Id))
+                                            {
+                                                <form asp-controller="Enroll" asp-action="Unenroll" asp-route-courseId="@course.Id" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn hủy đăng ký?')">
+                                                        <i class="fas fa-times-circle"></i> Hủy đăng ký
+                                                    </button>
+                                                </form>
+                                                <span class="enrolled-badge"><i class="fas fa-check-circle"></i> Đã đăng ký</span>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="Enroll" asp-action="Register" asp-route-courseId="@course.Id" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-success btn-sm">
+                                                        <i class="fas fa-plus-circle"></i> Đăng ký
+                                                    </button>
+                                                </form>
+                                            }
+                                        }
+                                        else if (!User.Identity!.IsAuthenticated)
+                                        {
+                                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-sign-in-alt"></i> Đăng nhập để đăng ký
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <p>Không tìm thấy học phần nào.</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="pagination-wrapper">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)" asp-route-search="@Model.SearchQuery">
+                        <i class="fas fa-chevron-left"></i> Trước
+                    </a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@Model.SearchQuery">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)" asp-route-search="@Model.SearchQuery">
+                        Sau <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

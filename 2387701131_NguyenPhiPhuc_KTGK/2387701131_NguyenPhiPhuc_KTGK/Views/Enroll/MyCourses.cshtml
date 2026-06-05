@@ -1,0 +1,64 @@
+@model IEnumerable<_2387701131_NguyenPhiPhuc_KTGK.Models.Enrollment>
+@{
+    ViewData["Title"] = "Học phần của tôi";
+}
+
+<div class="container mt-4">
+    <h1 class="page-title"><i class="fas fa-book-reader"></i> Học phần của tôi</h1>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var enrollment in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="my-course-card">
+                        <div class="my-course-image">
+                            @if (!string.IsNullOrEmpty(enrollment.Course?.Image))
+                            {
+                                <img src="@enrollment.Course!.Image" alt="@enrollment.Course.Name" />
+                            }
+                            else
+                            {
+                                <div class="course-image-placeholder">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="my-course-body">
+                            <h5>@enrollment.Course?.Name</h5>
+                            <div class="my-course-details">
+                                <span><i class="fas fa-star"></i> @enrollment.Course?.Credits tín chỉ</span>
+                                <span><i class="fas fa-chalkboard-teacher"></i> @enrollment.Course?.Lecturer</span>
+                                <span><i class="fas fa-folder"></i> @enrollment.Course?.Category?.Name</span>
+                                <span><i class="fas fa-calendar"></i> Đăng ký: @enrollment.EnrollDate.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <form asp-controller="Enroll" asp-action="Unenroll" asp-route-courseId="@enrollment.CourseId" method="post" class="mt-2">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger btn-sm w-100" onclick="return confirm('Bạn có chắc muốn hủy đăng ký?')">
+                                    <i class="fas fa-times-circle"></i> Hủy đăng ký
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-results">
+            <i class="fas fa-inbox"></i>
+            <p>Bạn chưa đăng ký học phần nào.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary"><i class="fas fa-search"></i> Khám phá học phần</a>
+        </div>
+    }
+</div>

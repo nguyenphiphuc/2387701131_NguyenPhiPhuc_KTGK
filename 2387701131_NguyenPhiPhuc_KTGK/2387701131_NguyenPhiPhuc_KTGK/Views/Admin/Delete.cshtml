@@ -1,0 +1,32 @@
+@model _2387701131_NguyenPhiPhuc_KTGK.Models.Course
+@{
+    ViewData["Title"] = "Xóa học phần";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="form-card">
+                <h2 class="form-title text-danger"><i class="fas fa-exclamation-triangle"></i> Xác nhận xóa</h2>
+                <p>Bạn có chắc chắn muốn xóa học phần này không?</p>
+                <div class="course-detail-card mb-4">
+                    <h4>@Model.Name</h4>
+                    <p><i class="fas fa-star"></i> <strong>Tín chỉ:</strong> @Model.Credits</p>
+                    <p><i class="fas fa-chalkboard-teacher"></i> <strong>Giảng viên:</strong> @Model.Lecturer</p>
+                    <p><i class="fas fa-folder"></i> <strong>Danh mục:</strong> @Model.Category?.Name</p>
+                    @if (!string.IsNullOrEmpty(Model.Image))
+                    {
+                        <img src="@Model.Image" alt="@Model.Name" class="img-thumbnail" style="max-height: 200px;" />
+                    }
+                </div>
+                <form asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg"><i class="fas fa-trash"></i> Xác nhận xóa</button>
+                        <a asp-action="Courses" class="btn btn-secondary btn-lg"><i class="fas fa-arrow-left"></i> Quay lại</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
